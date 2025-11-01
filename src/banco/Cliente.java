@@ -1,5 +1,6 @@
 package banco;
 
+@SuppressWarnings("all")
 public class Cliente {
     private String nome;
     private final String cpf;
