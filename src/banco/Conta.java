@@ -4,10 +4,10 @@ import exceptions.InsufficientBalanceException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 @SuppressWarnings("all")
 public class Conta {
-
     private final ArrayList<String> extratoConta;
     private final String password;
     private final Cliente cliente;
@@ -67,7 +67,7 @@ public class Conta {
                 System.out.println(extratoConta.get(i - 1));
             }
         } else {
-            System.out.println("ERROR: Nao existe nenhuma operacao nesta conta.");
+            throw new NoSuchElementException("Nao existe nenhuma operacao feita nesta conta.");
         }
     }
 

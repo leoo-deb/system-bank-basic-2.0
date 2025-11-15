@@ -2,6 +2,7 @@ package banco;
 
 import exceptions.*;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 @SuppressWarnings("all")
@@ -34,7 +35,7 @@ public class ContaBancaria {
                 if (cpf.matches("^(\\d{3}\\d{3}\\d{3}\\d{2})$")) {
                     for (Conta verificarCPF : contas) {
                         if (cpf.equals(verificarCPF.getCliente().getCpf())) {
-                            System.out.println("ERROR: O CPF digitado acima ja possui uma conta registrada.");
+                            System.out.println("ERROR: Ja possui uma conta registrada com esse CPF.");
                             return;
                         }
                     }
@@ -50,7 +51,7 @@ public class ContaBancaria {
                 if (email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
                     for (Conta verificarEmail : contas) {
                         if (email.equals(verificarEmail.getCliente().getEmail())) {
-                            System.out.println("ERROR: O Email digitado acima ja possui uma conta registrada.");
+                            System.out.println("ERROR: Ja possui uma conta registrada com esse email.");
                             return;
                         }
                     }
@@ -59,11 +60,10 @@ public class ContaBancaria {
                 System.out.println("ERROR: Email invalido.");
             }
 
-            Cliente criarCliente = new Cliente(nome, cpf, email);
             System.out.println("----------------------------");
 
             while (true) {
-                System.out.print("Crie uma senha de 4 digitos: ");
+                System.out.print("Crie uma senha de 4 digitos (somente numeros): ");
                 password = sc.nextLine();
 
                 if (password.matches("^(\\d{4})$")) {
@@ -82,10 +82,8 @@ public class ContaBancaria {
                 System.out.println("ERROR: A senha deve ser a mesma criada acima.");
             }
 
-            Conta conta = new Conta(criarCliente, password);
+            Conta conta = new Conta(new Cliente(nome, cpf, email), password);
             contas.add(conta);
-
-            System.out.println("----------------------------");
             System.out.println("SUCCESS: Conta criada com sucesso! Basta acessa-la no menu principal.");
             System.out.println(conta);
 
@@ -133,37 +131,50 @@ public class ContaBancaria {
                             }
 
                             if (op1 == 2) {
-                                System.out.println("----------------------------");
-                                System.out.print("Digite o valor para o saque: ");
-                                double saque = sc.nextDouble();
-                                sc.nextLine();
-                                try {
-                                    acesso.sacar(saque);
-                                    System.out.printf("SUCCESS: Saque realizado no valor de: R$ %.2f\n", saque);
-                                    System.out.printf("Saldo atual: R$ %.2f\n", acesso.getSaldo());
-                                } catch (IllegalArgumentException | InsufficientBalanceException e) {
-                                    System.out.println("ERROR: " + e.getMessage());
-                                }
+                                do {
+                                    System.out.println("----------------------------");
+                                    System.out.print("Digite o valor para o saque: ");
+                                    double saque = sc.nextDouble();
+                                    sc.nextLine();
+                                    try {
+                                        acesso.sacar(saque);
+                                        System.out.printf("SUCCESS: Saque realizado no valor de: R$ %.2f\n", saque);
+                                        System.out.printf("Saldo atual: R$ %.2f\n", acesso.getSaldo());
+                                    } catch (IllegalArgumentException | InsufficientBalanceException e) {
+                                        System.out.println("ERROR: " + e.getMessage());
+                                    }
+                                    System.out.print("Deseja fazer um novo saque? [S/N] ");
+                                    enter = sc.next().toUpperCase();
+                                } while (!enter.equals("N"));
                             }
 
                             if (op1 == 3) {
-                                System.out.println("----------------------------");
-                                System.out.print("Digite o valor para o deposito: ");
-                                double deposito = sc.nextDouble();
-                                sc.nextLine();
-                                try {
-                                    acesso.depositar(deposito);
-                                    System.out.printf("SUCCESS: Deposito realizado no valor de: R$ %.2f\n", deposito);
-                                    System.out.printf("Saldo atual: R$ %.2f\n", acesso.getSaldo());
-                                } catch (IllegalArgumentException | InsufficientBalanceException e) {
-                                    System.out.println("ERROR: " + e.getMessage());
-                                }
+                                do {
+                                    System.out.println("----------------------------");
+                                    System.out.print("Digite o valor para o deposito: ");
+                                    double deposito = sc.nextDouble();
+                                    sc.nextLine();
+                                    try {
+                                        acesso.depositar(deposito);
+                                        System.out.printf("SUCCESS: Deposito realizado no valor de: R$ %.2f\n", deposito);
+                                        System.out.printf("Saldo atual: R$ %.2f\n", acesso.getSaldo());
+                                    } catch (IllegalArgumentException e) {
+                                        System.out.println("ERROR: " + e.getMessage());
+                                    }
+                                    System.out.print("Deseja fazer um novo deposito? [S/N] ");
+                                    enter = sc.next().toUpperCase();
+                                } while (!enter.equals("N"));
                             }
 
                             if (op1 == 4) {
                                 do {
-                                    System.out.println("----------------------------");
-                                    acesso.extratoConta();
+                                    try {
+                                        System.out.println("----------------------------");
+                                        acesso.extratoConta();
+                                    } catch (NoSuchElementException e) {
+                                        System.out.println("ERROR: " + e.getMessage());
+                                        break;
+                                    }
                                     System.out.println("----------------------------");
                                     System.out.print("Pressione a tecla (ENTER) para voltar ao inicio.");
                                     enter = sc.nextLine();
